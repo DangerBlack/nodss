@@ -33,7 +33,7 @@ docker run -d nodss
 ## Library
 
 The library can be imported in other project to perform some google query. 
-Pay attention google may detect you are doing something some deep google policy so do not abuse it.
+Pay attention google may detect you are doing something against some deep google policy so do not abuse it.
 
 ## Why?
 
