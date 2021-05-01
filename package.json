@@ -1,0 +1,33 @@
+{
+  "name": "dss",
+  "version": "1.0.0",
+  "description": "A bot to take decision using Google",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "jest",
+    "start": "ts-node src/index.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/better-sqlite3": "^5.4.1",
+    "@types/jest": "^26.0.22",
+    "@types/node": "^14.14.37",
+    "@types/node-telegram-bot-api": "^0.51.1",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.5.5",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {
+    "better-sqlite3": "^7.1.4",
+    "cors": "^2.8.5",
+    "d3-node": "^2.2.2",
+    "dotenv": "^8.2.0",
+    "got": "^11.8.2",
+    "joi": "^17.4.0",
+    "node-telegram-bot-api": "^0.52.0",
+    "node-telegram-operation-manager": "^1.2.0",
+    "quickchart-js": "^1.0.7"
+  }
+}
