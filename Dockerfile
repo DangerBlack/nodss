@@ -1,15 +1,17 @@
-FROM node:12.12-alpine
+FROM golang:1.22.5
 
-RUN apk --no-cache add make gcc g++ python git
+WORKDIR /app
 
-COPY jest.config.json package-lock.json package.json ./
+COPY go.mod go.sum ./
 
-RUN npm i
+RUN go mod download
 
 COPY .env ./
 
+COPY *.go ./
+
 COPY src/ ./src/
 
-ENV NODE_ENV=production
+RUN CGO_ENABLED=0 GOOS=linux go build -o /godss
 
-CMD ["npm", "run", "start"]
+CMD ["/godss"]
