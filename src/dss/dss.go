@@ -23,7 +23,12 @@ const (
 type Dss struct{}
 
 // CountEvent fetches the Google search result for a query and returns the count of results
-func (d *Dss) CountEvent(query string) (int, error) {
+func (d *Dss) CountEvent(query string, after *time.Time) (int, error) {
+
+	if after != nil {
+		query = fmt.Sprintf("%s after:%s", query, after.Format("2006/01/02"))
+	}
+
 	searchKey := url.QueryEscape(`"` + strings.ReplaceAll(strings.TrimSpace(query), " ", "+") + `"`)
 	url := fmt.Sprintf("https://www.google.it/search?q=%s", searchKey)
 
@@ -90,7 +95,7 @@ func (d *Dss) CountEvent(query string) (int, error) {
 }
 
 // CountEvents returns the number of results for each of the provided search keys combined with a head
-func (d *Dss) CountEvents(head string, keys []string) (map[string]int, error) {
+func (d *Dss) CountEvents(head string, keys []string, after *time.Time) (map[string]int, error) {
 	results := make(map[string]int)
 	var wg sync.WaitGroup
 	mu := &sync.Mutex{} // Mutex to prevent concurrent map writes
@@ -103,7 +108,7 @@ func (d *Dss) CountEvents(head string, keys []string) (map[string]int, error) {
 			defer wg.Done()
 			query := fmt.Sprintf("%s %s", head, k)
 			println("Querying for", query)
-			count, err := d.CountEvent(query)
+			count, err := d.CountEvent(query, after)
 			if err != nil {
 				fmt.Printf("Error for query %s: %v\n", query, err)
 				return

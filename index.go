@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"512b.it/godss/src/chart"
 	"512b.it/godss/src/dss"
@@ -16,6 +17,7 @@ type ReplyData struct {
 	Head   string
 	Values []string
 	Repeat bool
+	After  *time.Time
 }
 
 var replyManager = make(map[int64]*ReplyData) // stores state for each user (chat_id)
@@ -60,7 +62,9 @@ func main() {
 		case strings.HasPrefix(text, "/start"):
 			handleStart(bot, chatID)
 		case strings.HasPrefix(text, "/pie"):
-			handlePieStart(bot, chatID)
+			handlePieStart(bot, chatID, nil)
+		case strings.HasPrefix(text, "/after"):
+			handlePieStart(bot, chatID, &text)
 		case replyManager[chatID] != nil:
 			handleReply(bot, chatID, text)
 		}
@@ -70,18 +74,32 @@ func main() {
 func handleStart(bot *tgbotapi.BotAPI, chatID int64) {
 	msg := tgbotapi.NewMessage(chatID, "Hello, I'm a @dsspiebot!\n"+
 		"Send me a phrase and some different conclusion of that phrase and I will tell you the online popularity.\nExample:\n"+
-		"/pie\n   I like\n   foods\n   cats")
+		"/pie\nI like\n foods\n cats\n/after 2021-01-01\nI like\n foods\n cats")
 	bot.Send(msg)
 }
 
-func handlePieStart(bot *tgbotapi.BotAPI, chatID int64) {
+func handlePieStart(bot *tgbotapi.BotAPI, chatID int64, afterString *string) {
 	msg := tgbotapi.NewMessage(chatID, "Please send the statement.")
 	bot.Send(msg)
+
+	var after *time.Time
+	if afterString != nil {
+		timeStr := strings.TrimPrefix(*afterString, "/after ")
+		afterParse, err := time.Parse("2006-01-02", timeStr)
+		if err != nil {
+			msg := tgbotapi.NewMessage(chatID, "Invalid date format. Please use YYYY-MM-DD.")
+			bot.Send(msg)
+			return
+		}
+
+		after = &afterParse
+	}
 
 	// Initialize state for this chat
 	replyManager[chatID] = &ReplyData{
 		Values: []string{},
 		Repeat: false,
+		After:  after,
 	}
 }
 
@@ -108,12 +126,12 @@ func handleReply(bot *tgbotapi.BotAPI, chatID int64, text string) {
 		bot.Send(msg)
 
 		// Call DSS function (replace with actual logic)
-		go generateChart(bot, chatID, data.Head, data.Values)
+		go generateChart(bot, chatID, data.Head, data.Values, data.After)
 		delete(replyManager, chatID) // Remove state after completion
 	}
 }
 
-func generateChart(bot *tgbotapi.BotAPI, chatID int64, head string, values []string) {
+func generateChart(bot *tgbotapi.BotAPI, chatID int64, head string, values []string, after *time.Time) {
 	var err error
 	// Simulate chart creation and response (replace with real implementation)
 	bot.Send(tgbotapi.NewChatAction(chatID, "upload_photo"))
@@ -122,7 +140,7 @@ func generateChart(bot *tgbotapi.BotAPI, chatID int64, head string, values []str
 
 	println("Generating chart for", head, strings.Join(values, ", "))
 	var results map[string]int
-	if results, err = counter.CountEvents(head, values); err != nil {
+	if results, err = counter.CountEvents(head, values, nil); err != nil {
 		msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("Unable to complete the operation for <i>\"%s\"</i>.", head))
 		msg.ParseMode = "HTML"
 		bot.Send(msg)
@@ -132,6 +150,10 @@ func generateChart(bot *tgbotapi.BotAPI, chatID int64, head string, values []str
 	orderResults := []int{}
 	for _, value := range values {
 		orderResults = append(orderResults, results[value])
+	}
+
+	if after != nil {
+		head = fmt.Sprintf("%s after %s", head, after.Format("2006-01-02"))
 	}
 
 	println("Creating chart for", head, strings.Join(values, ", "))
