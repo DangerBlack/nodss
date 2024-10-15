@@ -1,8 +1,0 @@
-{
-  "name": "nodss",
-  "preset": "ts-jest",
-  "testEnvironment": "node",
-  "jest": {
-    "verbose": false
-  }
-}

@@ -1,5 +1,5 @@
-# NoDSS
-## Node DSS (Decision Support System)
+# GoDSS
+## Go DSS (Decision Support System)
 
 Is a completely new implementation of [https://github.com/DangerBlack/Google-Decision-Support-System](https://github.com/DangerBlack/Google-Decision-Support-System) with a more permissive licence (M.I.T.)
 
@@ -18,16 +18,15 @@ TOKEN=xxxxxxxxxx:zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 To start the bot just write
 
 ```
-npm i
-npm run start
+go run index.go
 ```
 
 ### Docker container
 To start the docker container
 
 ```
-docker build -t nodss .
-docker run -d nodss
+docker build -t godss .
+docker run -d godss
 ```
 
 ## Library
